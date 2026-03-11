@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("CUSTOMER") // CUSTOMER | RESTAURANT_OWNER | DELIVERY_PERSON
+  phone        String?
+  address      String?
+  latitude     Float?
+  longitude    Float?
+  createdAt    DateTime @default(now())
+
+  restaurants Restaurant[]
+  orders      Order[]
+  deliveries  Delivery[]
+}
+
+model Restaurant {
+  id              String   @id @default(cuid())
+  ownerId         String
+  name            String
+  description     String
+  cuisine         String
+  address         String
+  latitude        Float
+  longitude       Float
+  imageUrl        String?
+  rating          Float    @default(0)
+  deliveryTimeMin Int      @default(30)
+  deliveryFee     Float    @default(2.5)
+  minimumOrder    Float    @default(8.0)
+  isOpen          Boolean  @default(true)
+  openingHours    String?
+  createdAt       DateTime @default(now())
+
+  owner      User           @relation(fields: [ownerId], references: [id])
+  categories MenuCategory[]
+  orders     Order[]
+}
+
+model MenuCategory {
+  id           String @id @default(cuid())
+  restaurantId String
+  name         String
+  sortOrder    Int    @default(0)
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  items      MenuItem[]
+}
+
+model MenuItem {
+  id          String  @id @default(cuid())
+  categoryId  String
+  name        String
+  description String?
+  price       Float
+  imageUrl    String?
+  isAvailable Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  category   MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  customerId      String
+  restaurantId    String
+  status          String   @default("PENDING") // PENDING | CONFIRMED | PREPARING | READY | PICKED_UP | DELIVERING | DELIVERED | CANCELLED
+  subtotal        Float
+  deliveryFee     Float
+  total           Float
+  deliveryAddress String
+  deliveryLat     Float?
+  deliveryLng     Float?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  customer   User        @relation(fields: [customerId], references: [id])
+  restaurant Restaurant  @relation(fields: [restaurantId], references: [id])
+  items      OrderItem[]
+  delivery   Delivery?
+}
+
+model OrderItem {
+  id           String @id @default(cuid())
+  orderId      String
+  menuItemId   String
+  menuItemName String
+  unitPrice    Float
+  quantity     Int
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+}
+
+model Delivery {
+  id          String    @id @default(cuid())
+  orderId     String    @unique
+  driverId    String
+  status      String    @default("ASSIGNED") // ASSIGNED | PICKED_UP | IN_TRANSIT | DELIVERED
+  currentLat  Float?
+  currentLng  Float?
+  pickedUpAt  DateTime?
+  deliveredAt DateTime?
+
+  order  Order @relation(fields: [orderId], references: [id])
+  driver User  @relation(fields: [driverId], references: [id])
+}
