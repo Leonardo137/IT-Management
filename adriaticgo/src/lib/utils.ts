@@ -33,6 +33,12 @@ export function getOrderStatusLabel(status: string): string {
   return labels[status] ?? status;
 }
 
+export const fetcher = (url: string) =>
+  fetch(url).then((res) => {
+    if (!res.ok) throw new Error("Request failed");
+    return res.json();
+  });
+
 export function getDeliveryStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     ASSIGNED: "Assigned",

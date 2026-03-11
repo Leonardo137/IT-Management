@@ -1,10 +1,30 @@
 import { UtensilsCrossed, MapPin, Clock, Star } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { RestaurantGrid } from "@/components/customer/RestaurantGrid";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const restaurants = await prisma.restaurant.findMany({
+    orderBy: { rating: "desc" },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      cuisine: true,
+      address: true,
+      imageUrl: true,
+      rating: true,
+      deliveryTimeMin: true,
+      deliveryFee: true,
+      minimumOrder: true,
+      isOpen: true,
+    },
+  });
+
+  const cuisines = [...new Set(restaurants.map((r) => r.cuisine))];
+
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      {/* Hero */}
-      <section className="mb-16 text-center">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <section className="mb-12 text-center">
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
           <UtensilsCrossed className="h-8 w-8" />
         </div>
@@ -18,44 +38,39 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* Features */}
-      <section className="mb-16 grid gap-8 sm:grid-cols-3">
-        <div className="rounded-xl border bg-card p-6 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <MapPin className="h-6 w-6" />
+      <section className="mb-12 grid gap-6 sm:grid-cols-3">
+        <div className="rounded-xl border bg-card p-5 text-center">
+          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <MapPin className="h-5 w-5" />
           </div>
-          <h3 className="mb-2 font-semibold">Local Restaurants</h3>
+          <h3 className="mb-1 font-semibold">Local Restaurants</h3>
           <p className="text-sm text-muted-foreground">
-            5 restaurants in Koper, from Mediterranean to Asian fusion
+            {restaurants.length} restaurants in Koper
           </p>
         </div>
-        <div className="rounded-xl border bg-card p-6 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Clock className="h-6 w-6" />
+        <div className="rounded-xl border bg-card p-5 text-center">
+          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Clock className="h-5 w-5" />
           </div>
-          <h3 className="mb-2 font-semibold">Fast Delivery</h3>
+          <h3 className="mb-1 font-semibold">Fast Delivery</h3>
           <p className="text-sm text-muted-foreground">
-            Track your order in real-time from kitchen to doorstep
+            Track your order in real-time
           </p>
         </div>
-        <div className="rounded-xl border bg-card p-6 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Star className="h-6 w-6" />
+        <div className="rounded-xl border bg-card p-5 text-center">
+          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Star className="h-5 w-5" />
           </div>
-          <h3 className="mb-2 font-semibold">Quality Food</h3>
+          <h3 className="mb-1 font-semibold">Quality Food</h3>
           <p className="text-sm text-muted-foreground">
-            Curated selection of top-rated coastal cuisine
+            Curated coastal cuisine
           </p>
         </div>
       </section>
 
-      {/* Placeholder for restaurant grid */}
       <section>
         <h2 className="mb-6 text-2xl font-bold">Restaurants near you</h2>
-        <p className="text-muted-foreground">
-         Sign in with a
-          demo account to explore the full experience.
-        </p>
+        <RestaurantGrid restaurants={restaurants} cuisines={cuisines} />
       </section>
     </div>
   );

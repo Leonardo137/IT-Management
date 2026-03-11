@@ -23,8 +23,5 @@ Open [http://localhost:3000](http://localhost:3000).
 | Restaurant Owner | owner@demo.com     | password123   |
 | Delivery Driver  | driver@demo.com    | password123   |
 
-## Tech Stack
-
-
 
 

@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useCart } from "@/hooks/useCart";
 
 function getInitials(name: string): string {
   return name
@@ -116,6 +117,16 @@ function getRoleBadge(role: string): string {
   return labels[role] ?? role;
 }
 
+function CartBadge() {
+  const { totalItems } = useCart();
+  if (totalItems === 0) return null;
+  return (
+    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/90 px-1.5 text-[10px] font-bold text-primary-foreground">
+      {totalItems}
+    </span>
+  );
+}
+
 export function Navbar() {
   const { data: session, status } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -145,6 +156,7 @@ export function Navbar() {
               <Button variant="ghost" size="sm" className="gap-2">
                 {link.icon}
                 {link.label}
+                {link.href === "/cart" && <CartBadge />}
               </Button>
             </Link>
           ))}
