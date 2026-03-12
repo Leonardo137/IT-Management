@@ -41,6 +41,17 @@ export const orderStatusSchema = z.object({
   ]),
 });
 
+export const menuCategorySchema = z.object({
+  restaurantId: z.string().min(1),
+  name: z.string().min(1, "Name is required"),
+  sortOrder: z.number().int().min(0).optional(),
+});
+
+export const menuCategoryUpdateSchema = z.object({
+  name: z.string().min(1, "Category name is required").optional(),
+  sortOrder: z.number().int().min(0).optional(),
+});
+
 export const menuItemSchema = z.object({
   categoryId: z.string().min(1),
   name: z.string().min(1, "Name is required"),
@@ -48,6 +59,7 @@ export const menuItemSchema = z.object({
   price: z.number().positive("Price must be positive"),
   imageUrl: z.string().optional(),
   isAvailable: z.boolean().optional(),
+  sortOrder: z.number().int().optional(),
 });
 
 export const deliveryLocationSchema = z.object({
