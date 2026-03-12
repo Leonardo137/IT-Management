@@ -36,11 +36,17 @@ export async function GET(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    if (
-      session.user.role === "CUSTOMER" &&
-      order.customerId !== session.user.id
-    ) {
+    const role = session.user.role as string;
+    if (role === "CUSTOMER" && order.customerId !== session.user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    if (role === "RESTAURANT_OWNER") {
+      const restaurant = await prisma.restaurant.findFirst({
+        where: { id: order.restaurantId, ownerId: session.user.id },
+      });
+      if (!restaurant) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     return NextResponse.json(order);

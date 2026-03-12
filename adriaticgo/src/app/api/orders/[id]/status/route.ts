@@ -26,9 +26,21 @@ export async function PATCH(
 
     const { status: newStatus } = parsed.data;
 
-    const order = await prisma.order.findUnique({ where: { id } });
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: { restaurant: { select: { ownerId: true } } },
+    });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    const role = session.user.role as string;
+    if (role === "RESTAURANT_OWNER") {
+      if (order.restaurant.ownerId !== session.user.id) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    } else if (role !== "DELIVERY_PERSON") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const allowedNext = VALID_TRANSITIONS[order.status];

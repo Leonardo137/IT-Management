@@ -10,11 +10,18 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const role = session.user.role;
-    const where: Record<string, string> = {};
+    const role = session.user.role as string;
+    const where: Record<string, unknown> = {};
 
     if (role === "CUSTOMER") {
       where.customerId = session.user.id;
+    } else if (role === "RESTAURANT_OWNER") {
+      const restaurants = await prisma.restaurant.findMany({
+        where: { ownerId: session.user.id },
+        select: { id: true },
+      });
+      const restaurantIds = restaurants.map((r) => r.id);
+      where.restaurantId = { in: restaurantIds };
     }
 
     const orders = await prisma.order.findMany({
