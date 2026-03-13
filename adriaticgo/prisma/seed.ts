@@ -1,10 +1,13 @@
-import { PrismaClient } from "../src/generated/prisma/client.js";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { createRequire } from "module";
+import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 
-const adapter = new PrismaBetterSqlite3({
-  url: "file:./dev.db",
-});
+const require = createRequire(import.meta.url);
+const { PrismaClient } = require("@prisma/client");
+
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) throw new Error("DATABASE_URL is required for seeding");
+const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {

@@ -2,6 +2,8 @@ import { UtensilsCrossed, MapPin, Clock, Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { RestaurantGrid } from "@/components/customer/RestaurantGrid";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const restaurants = await prisma.restaurant.findMany({
     orderBy: { rating: "desc" },
